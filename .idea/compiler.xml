@@ -10,8 +10,5 @@
         <module name="word-count" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="favourite-colour" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
