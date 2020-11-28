@@ -1,0 +1,4 @@
+# Project exclude paths
+/favourite-colour/target/
+/target/
+/word-count/target/
