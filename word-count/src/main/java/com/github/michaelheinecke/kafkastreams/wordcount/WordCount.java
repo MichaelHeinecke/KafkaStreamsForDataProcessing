@@ -16,12 +16,15 @@ import java.util.Properties;
 
 public class WordCount {
 
+    public static final String INPUT_TOPIC = "word-count-input";
+    public static final String OUTPUT_TOPIC = "word-count-output";
+
     public Topology createTopology(){
 
         StreamsBuilder builder = new StreamsBuilder();
 
         // 1 - stream from Kafka
-        KStream<String, String> textLines = builder.stream("word-count-input");
+        KStream<String, String> textLines = builder.stream(INPUT_TOPIC);
         KTable<String, Long> wordCount = textLines
                 // 2 - map values to lowercase
                 .mapValues(value -> value.toLowerCase())
@@ -35,7 +38,7 @@ public class WordCount {
                 .count(Materialized.as("counts"));
 
         // 7 - to in order to write the results back to kafka
-        wordCount.toStream().to("word-count-output", Produced.with(Serdes.String(), Serdes.Long()));
+        wordCount.toStream().to(OUTPUT_TOPIC, Produced.with(Serdes.String(), Serdes.Long()));
 
         return builder.build();
     }
