@@ -67,7 +67,7 @@ public class TransactionProducer {
 
         logger.info(transaction.toString());
 
-        return new ProducerRecord<>("bank_balance_input", name, transaction.toString());
+        return new ProducerRecord<>("bank-balance-input", name, transaction.toString());
     }
 
     private KafkaProducer<String, String> createKafkaProducer() {
