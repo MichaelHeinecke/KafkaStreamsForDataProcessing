@@ -2,6 +2,8 @@ package com.github.michaelheinecke.kafkastreams.bankbalance;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class TransactionProducer {
@@ -19,8 +22,6 @@ public class TransactionProducer {
     private static final Random random = new Random();
     // names for Transactions and ProducerRecord key
     private static final String[] names = {"Adalbert", "Mildrid", "Herman", "Sextus", "Augustus", "Cleopatra"};
-    // object to JSON
-    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     public TransactionProducer() {
     }
@@ -44,7 +45,7 @@ public class TransactionProducer {
         // produce data in endless loop
         while (true) {
             // pick random name from names array
-            String name = names[random.nextInt(names.length)];
+            String name = names[ThreadLocalRandom.current().nextInt(names.length)];
 
             // produce ~10 messages per second
             try {
@@ -59,22 +60,18 @@ public class TransactionProducer {
     }
 
     private ProducerRecord<String, String> createRandomTransaction(String name) {
-        String json = "";
-        // get random amount between 0 and 99
-        Integer amount = random.nextInt(100);
+        // creates an empty json {}
+        ObjectNode transaction = JsonNodeFactory.instance.objectNode();
 
-        Transaction transaction = new Transaction(name, amount, Instant.now().toString());
+        Integer amount = ThreadLocalRandom.current().nextInt(0, 100);
 
-        // create json string from transaction object
-        try {
-            json = objectMapper.writeValueAsString(transaction);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        transaction.put("name", name);
+        transaction.put("amount", amount);
+        transaction.put("time", Instant.now().toString());
 
-        logger.info(json);
+        logger.info(transaction.toString());
 
-        return new ProducerRecord<>("bank_balance_input", name, json);
+        return new ProducerRecord<>("bank_balance_input", name, transaction.toString());
     }
 
     private KafkaProducer<String, String> createKafkaProducer() {
