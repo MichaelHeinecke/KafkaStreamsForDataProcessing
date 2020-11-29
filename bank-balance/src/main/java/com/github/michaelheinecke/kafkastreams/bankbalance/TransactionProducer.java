@@ -13,13 +13,11 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 import java.util.Properties;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class TransactionProducer {
     private static final Logger logger = LoggerFactory.getLogger(TransactionProducer.class.getName());
-    private static final Random random = new Random();
     // names for Transactions and ProducerRecord key
     private static final String[] names = {"Adalbert", "Mildrid", "Herman", "Sextus", "Augustus", "Cleopatra"};
 
