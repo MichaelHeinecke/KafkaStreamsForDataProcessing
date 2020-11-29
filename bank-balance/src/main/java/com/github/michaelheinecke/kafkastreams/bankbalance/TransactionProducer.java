@@ -25,11 +25,11 @@ public class TransactionProducer {
     public TransactionProducer() {
     }
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         new TransactionProducer().run();
     }
 
-    public void run() throws InterruptedException {
+    public void run() {
         // create a kafka producer
         KafkaProducer<String, String> producer = createKafkaProducer();
 
@@ -43,31 +43,38 @@ public class TransactionProducer {
 
         // produce data in endless loop
         while (true) {
-            String json = "";
             // pick random name from names array
             String name = names[random.nextInt(names.length)];
-            // get random amount between 0 and 9999
-            Integer amount = random.nextInt(10000);
 
-            Transaction transaction = new Transaction(name, amount, Instant.now().toString());
-
-            // create json string from transaction object
+            // produce ~10 messages per second
             try {
-                json = objectMapper.writeValueAsString(transaction);
-            } catch (JsonProcessingException e) {
+                producer.send(createRandomTransaction(name));
+                TimeUnit.MILLISECONDS.sleep(100);
+            } catch (InterruptedException e) {
                 e.printStackTrace();
+                break;
             }
-
-            logger.info(json);
-            producer.send(new ProducerRecord<>("bank_balance_input", name, json), (recordMetadata, e) -> {
-                if (e != null) {
-                    logger.error("Encountered error: ", e);
-                }
-            });
-
-            // produce ~100 messages per second
-            TimeUnit.MILLISECONDS.sleep(10);
         }
+        producer.close();
+    }
+
+    private ProducerRecord<String, String> createRandomTransaction(String name) {
+        String json = "";
+        // get random amount between 0 and 99
+        Integer amount = random.nextInt(100);
+
+        Transaction transaction = new Transaction(name, amount, Instant.now().toString());
+
+        // create json string from transaction object
+        try {
+            json = objectMapper.writeValueAsString(transaction);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        logger.info(json);
+
+        return new ProducerRecord<>("bank_balance_input", name, json);
     }
 
     private KafkaProducer<String, String> createKafkaProducer() {
