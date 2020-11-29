@@ -83,8 +83,8 @@ public class TransactionProducer {
         properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
         // below properties are implicit with ENABLE_IDEMPOTENCE_CONFIG set to true; added for clarity
         properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
-        properties.setProperty(ProducerConfig.RETRIES_CONFIG, Integer.toString(Integer.MAX_VALUE));
-        properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5");
+        properties.setProperty(ProducerConfig.RETRIES_CONFIG, "3");
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "1");
 
         return new KafkaProducer<>(properties);
     }
